@@ -105,7 +105,72 @@
 </script>
 
 <style>
-    /* Add your CSS styles here */
+    main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .valve-control {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 1rem;
+    }
+
+    .valve-control button {
+        margin-top: 1rem;
+    }
+
+    .valve-control input {
+        margin-bottom: 1rem;
+    }
+
+    .valve-control h2 {z
+        margin-bottom: 0;
+    }
+
+    .valve-control h2::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 1px;
+        background-color: #000;
+        margin-top: 0.5rem;
+    }
+
+    .valve-control h2:last-child::after {
+        display: none;
+    }
+
+    .valve-control button {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        border: 1px solid #000;
+        background-color: #fff;
+        cursor: pointer;
+    }
+
+    .valve-control button:hover {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .valve-control button:active {
+        background-color: #000;
+        color: #fff;
+    }
+
+    .valve-control button:focus {
+        outline: none;
+    }
+
+    .valve-control button:disabled {
+        background-color: #ccc;
+        color: #000;
+        cursor: not-allowed;
+    }
+
 </style>
 
 <main>
