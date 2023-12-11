@@ -1,24 +1,17 @@
 <script>
     // Placeholder for the server URL
     let HOST = "https://cumulunimbus-web.azurewebsites.net"
-    //HOST="http://localhost:3000"
+ /* HOST="http://localhost:3000" */
 
     let flipInterval = 15;
     let timeToFlip = flipInterval;
 
     let valves = [];
     let valveStates = {};
+    let interestValve = null;
+    let usingInterval = false;
 
-    setInterval(() => {
-        if (timeToFlip > 0) timeToFlip--;
-        else{
-            //alert("Flipping all valves");
-            timeToFlip = flipInterval;
-            for(let i = 0; i < valves.length; i++){
-                toggleValve(i);
-            }
-        }
-    }, 1000);
+
 
  const getDevices = async () => {
         try {
@@ -54,7 +47,7 @@
             if (response.ok) {
                 const data = await response.json();
                 if (data.actionId) {
-                    waitForAcknowledgement(data.actionId, valveId);
+                    await waitForAcknowledgement(data.actionId, valveId);
                 }
             }
         } catch (error) {
@@ -102,6 +95,19 @@
             })
             .catch(error => console.error('Error adding valve:', error));
     }
+
+    const triggerFlip = async () => {
+        console.log('triggering flip', usingInterval, timeToFlip);
+        if (usingInterval) {
+            if (timeToFlip <= 0) {
+                await toggleValve(interestValve);
+                timeToFlip = flipInterval;
+            } else {
+                timeToFlip--;
+            }
+            setTimeout(triggerFlip, 1000);
+        }
+    }
 </script>
 
 <style>
@@ -126,7 +132,7 @@
         margin-bottom: 1rem;
     }
 
-    .valve-control h2 {z
+    .valve-control h2 {
         margin-bottom: 0;
     }
 
@@ -191,7 +197,20 @@
         </button>
     </div>
     <div>
-        <p><br><br><br><br></p>
-        <p>Valves will toggle in {timeToFlip} seconds.</p>
+        <h2>Set Flip Interval</h2>
+        <input type="text" id="flipInterval" placeholder="Flip Interval" />
+        <input type="text" id="interestValve" placeholder="Valve ID" />
+        <button on:click={() => {
+            flipInterval = document.getElementById('flipInterval').value;
+            interestValve = document.getElementById('interestValve').value;
+            timeToFlip = flipInterval;
+            usingInterval = ! usingInterval;
+            triggerFlip();
+        }}>
+            {usingInterval ? 'Stop' : 'Start'} Interval
+        </button>
+
+        <p>{"Flipping every " + flipInterval + " seconds"}</p>
+
     </div>
 </main>
