@@ -1,13 +1,29 @@
 <script>
     // Placeholder for the server URL
-    const HOST = "https://cumulunimbus-web.azurewebsites.net"
+    let HOST = "https://cumulunimbus-web.azurewebsites.net"
+ HOST="http://localhost:3000"
 
-    let valves = ['MAM'];
+ const getDevices = async () => {
+        try {
+            const response = await fetch(`${HOST}/devices`);
+            if (response.ok) {
+                const data = await response.json();
+                return data;
+            }
+        } catch (error) {
+            console.error('Error getting devices:', error);
+        }
+    }
+
+    let valves = [];
     let valveStates = {};
-
-    // Initialize valve states
-    valves.forEach(valve => {
-        valveStates[valve] = false;
+ document.addEventListener('DOMContentLoaded', async () => {
+        const devices = await getDevices();
+        valves = devices.map(device => device);
+        valveStates = {};
+        valves.forEach(valve => {
+            valveStates[valve] = false;
+        });
     });
 
     async function toggleValve(valveId) {
@@ -31,22 +47,45 @@
         }
     }
 
-    async function waitForAcknowledgement(actionId, valveId) {
+    async function waitForAcknowledgement(actionId, valveId,count=0) {
         try {
             const response = await fetch(`${HOST}/acknowledged/${actionId}`);
             if (response.ok) {
                 const data = await response.json();
+                if (count > 10) {
+                    console.error('No acknowledgement received');
+                    alert('No acknowledgement received');
+                    return;
+                }
                 if (data.acknowledged) {
                     valveStates[valveId] = !valveStates[valveId];
                 } else {
                     setTimeout(() => {
-                        waitForAcknowledgement(actionId, valveId);
+                        waitForAcknowledgement(actionId, valveId,count+1);
                     }, 1000);
                 }
             }
         } catch (error) {
             console.error('Error waiting for acknowledgement:', error);
         }
+    }
+
+ const addValve = () => {
+        const valveId = document.getElementById('valveId').value;
+     // send to /devices/:id
+        fetch(`${HOST}/devices/${valveId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ state: false })
+        })
+            .then(response => response.json())
+            .then(data => {
+                valves.push(valveId);
+                valveStates[valveId] = false;
+            })
+            .catch(error => console.error('Error adding valve:', error));
     }
 </script>
 
@@ -64,4 +103,11 @@
             </button>
         </div>
     {/each}
+    <div class="valve-control">
+        <h2>Add a new valve</h2>
+        <input type="text" id="valveId" placeholder="Valve ID" />
+        <button on:click={addValve}>
+            Add Valve
+        </button>
+    </div>
 </main>
