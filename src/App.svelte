@@ -1,7 +1,24 @@
 <script>
     // Placeholder for the server URL
     let HOST = "https://cumulunimbus-web.azurewebsites.net"
- HOST="http://localhost:3000"
+    //HOST="http://localhost:3000"
+
+    let flipInterval = 15;
+    let timeToFlip = flipInterval;
+
+    let valves = [];
+    let valveStates = {};
+
+    setInterval(() => {
+        if (timeToFlip > 0) timeToFlip--;
+        else{
+            //alert("Flipping all valves");
+            timeToFlip = flipInterval;
+            for(let i = 0; i < valves.length; i++){
+                toggleValve(i);
+            }
+        }
+    }, 1000);
 
  const getDevices = async () => {
         try {
@@ -15,8 +32,6 @@
         }
     }
 
-    let valves = [];
-    let valveStates = {};
  document.addEventListener('DOMContentLoaded', async () => {
         const devices = await getDevices();
         valves = devices.map(device => device);
@@ -109,5 +124,9 @@
         <button on:click={addValve}>
             Add Valve
         </button>
+    </div>
+    <div>
+        <p><br><br><br><br></p>
+        <p>Valves will toggle in {timeToFlip} seconds.</p>
     </div>
 </main>
